@@ -47,7 +47,7 @@
         <div class="col-xs-6">
           <div class="form-group">
             <label for="email">Email: </label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="Enter Email" required />
+            <input type="email" id="email" name="email" class="form-control" placeholder="Enter Email" required data-msg-email="Your email is invalid, please update your email." />
           </div>
         </div>
         <div class="col-xs-12">
@@ -64,6 +64,36 @@
         </div>
       </div>
     </form>
+    <br>
+    <br>
+    <h1>Key notes:</h1>
+    <h3>For styling we need to pay attention to many cases:</h3>
+    <ol>
+      <li>Invalid inputs</li>
+      <li>Loading status (submitting data to server)</li>
+      <li>Failed request</li>
+      <li>Success request</li>
+      <li>Timeout request</li>
+      <li>General error request that we need to inform the user</li>
+    </ol>
+    <h3>For coding</h3>
+    <ol>
+      <li>
+        The form element markup has to include data-timeout-msg and data-generror-msg attribute to make it more user friendly
+        <pre>&lt;form role="form" id="contactForm" method="POST" action="/ajax-form/process.php" data-timeout-msg="Your request is timeout. Please retry in a moment." data-generror-msg="Your request is failed. Please retry in a moment." &gt;&lt;/form&gt;
+        </pre>
+      </li>
+      <li>
+        Each input will have to have each own error notification message. In email for eg: <strong>data-msg-email="Your email is invalid, please update your email."</strong>
+        <pre>&lt;input type="email" id="email" name="email" class="form-control" placeholder="Enter Email" required data-msg-email="Your email is invalid, please update your email." /&gt;
+        </pre>
+      </li>
+      <li>
+        Also include the form message container to inform user in case where the server or connection have issues.
+        <pre>&lt;div class="msgSubmit"&gt;&lt;/div&gt;
+        </pre>
+      </li>
+    </ol>
 </div>
 </div>
 </body>
