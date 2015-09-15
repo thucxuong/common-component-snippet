@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact form using Bootstrap 3.3.4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="../styles/bootstrap.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <style>
+      form button[type='submit']{
+        width: 200px;
+        text-align: center;
+      }
+      form button.loading:before{
+        position: relative;
+        top: 1px;
+        display: inline-block;
+        font-family: 'Glyphicons Halflings';
+        font-style: normal;
+        font-weight: normal;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        content: "\e031";
+        margin-right: 10px;
+        vertical-align: middle;
+        position: relative;
+        top: -2px;
+      }
+      .form-group label.error{
+        color: #a94442;
+      }
+    </style>
+</head>
+<body>
+<div class="row">
+<div class="col-sm-6 col-sm-offset-3">
+    <h3>Send me a message</h3>
+    <form role="form" id="contactForm" method="POST" action="/ajax-form/process.php" data-timeout-msg="Your request is timeout. Please retry in a moment." data-generror-msg="Your request is failed. Please retry in a moment." >
+      <div class="row">
+        <div class="col-xs-6">
+          <div class="form-group">
+            <label for="name">Name: </label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Enter Name" required />
+          </div>
+        </div>
+        <div class="col-xs-6">
+          <div class="form-group">
+            <label for="email">Email: </label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Enter Email" required />
+          </div>
+        </div>
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label for="message">Message: </label>
+            <textarea name="message" id="message" cols="30" rows="10" class="form-control" required placeholder="Enter your message..."></textarea>
+          </div>
+        </div>
+        <div class="col-xs-12 text-right">
+          <button type="submit" value="" name="submit" class="btn btn-lg btn-success" data-loading-text="Loading" >Send Request</button>
+        </div>
+        <div class="text-center">
+          <div class="msgSubmit" style="font-weight: bold; font-size: 20px;"></div>
+        </div>
+      </div>
+    </form>
+</div>
+</div>
+</body>
+<script type="text/javascript" src="../scripts/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="../scripts/jquery.validate.js"></script>
+<script type="text/javascript" src="../scripts/bootstrap.min.js"></script>
+<script type="text/javascript">
+  jQuery(document).ready(function($){
+    
+    var ajaxFormModule = (function(){
+
+      var view = $("#contactForm");
+      var module = {};
+
+      var formLoadingState = function(loading){
+        if(loading){
+          view.addClass("loading");
+          view.find("button[type='submit']").button('loading').addClass('loading');
+        }else{
+          view.removeClass("loading");
+          view.find("button[type='submit']").button('reset').removeClass('loading');
+        }
+      };
+
+      var enableForm = function(loading){
+        formLoadingState(loading);
+        view.find('button, input, textarea').prop('readonly', false);
+      }
+
+      var disabledForm = function(loading){
+        formLoadingState(loading);
+        view.find('button, input, textarea').prop('readonly', true);
+      }
+
+      var highlightHandler = function(input){
+        $(input).closest(".form-group").addClass("has-error");
+      };
+
+      var unhighlightHandler = function(input){
+        $(input).closest(".form-group").removeClass("has-error");
+      };
+
+      var invalidHandler = function(){
+        formMessage(false, false, "");
+      };
+
+      var formMessage = function(success, show, message){
+        if(typeof success !== 'undefined' && typeof show !== 'undefined'){
+          view.find(".msgSubmit").toggleClass("text-danger", !success).toggleClass("text-success", success).html(message).toggle(show);
+        }
+        return;
+      }
+
+      var ajaxSuccessHandler = function(response){
+        if (response.status == "success"){
+          view.get(0).reset();
+          formMessage(true, true, response.message);
+        }else{
+          formMessage(false, true, response.message);
+        }
+        enableForm(false);
+      };
+
+      var ajaxErrorHandler = function(xhr, textStatus, errorThrown ) {
+        if (textStatus == 'timeout') {
+          this.tryCount++;
+          if (this.tryCount <= this.retryLimit) {
+            $.ajax(this);
+            return;
+          }
+          formMessage(false, true, view.attr("data-timeout-msg"));
+          enableForm(false);
+          return;
+        } else {
+          formMessage(false, true, view.attr("data-generror-msg"));
+          enableForm(false);
+        }
+      };
+
+      var submitHandler = function(){
+        disabledForm(true);
+        $.ajax({
+          type: "POST",
+          url: view.get(0).action,
+          data: view.serialize(),
+          tryCount : 0,
+          retryLimit : 3,
+          success : ajaxSuccessHandler,
+          error : ajaxErrorHandler
+        });   
+      }
+
+      module.init = function(){
+        view.validate({
+          highlight         : highlightHandler,
+          unhighlight       : unhighlightHandler,
+          invalidHandler    : invalidHandler,
+          submitHandler     : submitHandler
+        });
+      }
+
+      return module.init();
+    })();
+  });
+</script>
+</html>
