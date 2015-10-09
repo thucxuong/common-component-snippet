@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact form using Bootstrap 3.3.4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="../styles/bootstrap.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <style>
+      .video-wrapper {
+        position: relative;
+        padding-top: 56.25%;
+      }
+
+      .device .video-wrapper .if-overlay {
+        display: none;
+      }
+
+      .video-wrapper .if-overlay,
+      .video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .video-wrapper .if-overlay img,
+      .video-wrapper iframe img {
+        width: 100%;
+      }
+
+      .video-wrapper .play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        background: red;
+        background-size: cover;
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+        transform: translateX(-50%) translateY(-50%);
+        border-radius: 50%;
+      }
+
+      .device .video-wrapper .play-btn {
+        display: none;
+      }
+
+    </style>
+</head>
+<body>
+<div class="row">
+<div class="col-sm-6 col-sm-offset-3">
+  <div class="video-wrapper">
+    <div id="resource-video-player" class="video-player" data-id="HQzu7NYlZNQ"></div>
+    <div class="if-overlay"><img src="http://placehold.it/1140x642" alt="video thumbnail"></div>
+    <div class="play-btn"></div>
+  </div>
+  <h1 class="video-time text-center"></h1>
+</div>
+</div>
+</body>
+<script type="text/javascript" src="../scripts/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="../scripts/jquery.validate.js"></script>
+<script type="text/javascript" src="../scripts/bootstrap.min.js"></script>
+<script type="text/javascript">
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+<script type="text/javascript">
+  jQuery(document).ready(function($){
+    
+    window.ytVideoModule = (function(){
+      var module = {};
+      var videosObj = {};
+      var videoPlayers;
+      var videoState = {
+         "-1": "youtubeUnstarted",
+         "0": "youtubeEnded",
+         "1": "youtubePlaying",
+         "2": "youtubePaused",
+         "3": "youtubeBuffering",
+         "5": "youtubeCued"
+      };
+
+      module.init = function(){
+        videoPlayers = $(".video-player");
+        if(videoPlayers.length === 0){
+          return;
+        }
+        $(videoPlayers).each(function(){
+          var $_this = $(this);
+          var videoId = $_this.attr('data-id');
+          videosObj[this.id] = new YT.Player(this.id, {
+            height: $_this.attr('data-height'),
+            width: $_this.attr('data-width'),
+            videoId: videoId ? videoId : '',
+            events: {   
+              'onReady': function(ytvideoEventObj) {
+                $(ytvideoEventObj.target.f).trigger("youtubeReady");
+              },
+              'onStateChange': function(ytvideoEventObj){
+                console.log($(ytvideoEventObj.target.f).attr('data-id'));
+                if(videoState[ytvideoEventObj.data] != undefined){
+                  $(ytvideoEventObj.target.f).trigger(videoState[ytvideoEventObj.data], [$(ytvideoEventObj.target.f).attr('data-id')]);
+                }
+              }
+            }
+          });
+        });
+        $(document).trigger("videoModuleReady");
+        return module;
+      };
+
+      module.getVideoById = function(id){
+        return videosObj[id];
+      };
+
+      module.videosDurationRetrive = function(selector, videoidAttributeName, cb){
+        var videos = $(selector);
+            videoIDsArr = [],
+            videoidAttributeName = videoidAttributeName ? videoidAttributeName : 'data-id';
+
+        videos.each(function() {
+            videoIDsArr.push($(this).attr(videoidAttributeName));
+        });
+        
+
+        var videoInfoRetreiveURL = "https://www.googleapis.com/youtube/v3/videos?id=" + videoIDsArr.join(",") + "&part=contentDetails&key=AIzaSyCkdDFKttW90ed6SBOYzao3pgvdweeALH4";
+        var videosDuration = {};
+
+        $.getJSON(videoInfoRetreiveURL, function(data) {
+          $.each(data.items, function(ind, item) {
+            if (item.contentDetails) {
+              var timeStr = item.contentDetails.duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
+              videosDuration["v" + item.id] = timeStr;
+            }
+          });
+          cb(videosDuration);
+        });
+
+        return;
+      };
+
+      module.videoDurationRetrive = function(selector, videoidAttributeName, cb){
+        var video = $(selector),
+            videoID = videoidAttributeName ? video.attr(videoidAttributeName) : video.attr("data-id");
+
+        $.getJSON("https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&part=contentDetails&key=AIzaSyCkdDFKttW90ed6SBOYzao3pgvdweeALH4", function(data) {
+          console.log(data);
+          if (data.items[0].contentDetails) {
+            var timeStr = data.items[0].contentDetails.duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
+          }
+          cb(timeStr);
+        });
+
+        return;
+      };
+
+      return module;
+
+    })();
+
+    window.onYouTubeIframeAPIReady = function() {
+      window.ytVideoModule.init();
+    }
+
+    $(document).on("videoModuleReady", function(){
+      $("body").on("click", ".play-btn", function() {
+        var overlay = $(this).parent().find(".if-overlay"),
+          playBtn = $(this),
+          video = $(this).parent().find(".video-player");
+          ytVideoModule.getVideoById(video.get(0).id).playVideo();
+          setTimeout(function() {
+            playBtn.fadeOut();
+            overlay.fadeOut();
+          }, 500);
+      });
+      ytVideoModule.videoDurationRetrive("#resource-video-player","data-id", function(time){
+        $(".video-time").html(time);
+      });
+    });
+    
+  });
+</script>
+</html>
