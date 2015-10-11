@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Contact form using Bootstrap 3.3.4</title>
+    <title>Youtube Player Control Module</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../styles/bootstrap.css">
     <link rel="stylesheet" href="../styles/main.css">
     <style>
+      body{
+        font-family: 'Open Sans', Arial, sans-serif;
+      }
+
+      /* Core Style */
       .video-wrapper {
         position: relative;
         padding-top: 56.25%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        margin-top: 30px;
       }
 
       .device .video-wrapper .if-overlay {
@@ -35,18 +43,69 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        background: red;
-        background-size: cover;
-        width: 60px;
-        height: 60px;
-        cursor: pointer;
         transform: translateX(-50%) translateY(-50%);
-        border-radius: 50%;
       }
 
       .device .video-wrapper .play-btn {
         display: none;
       }
+
+      /* Irrelevant Styles */
+      @-webkit-keyframes spin {
+        to {
+          -webkit-transform: rotate(360deg);
+                  transform: rotate(360deg);
+        }
+      }
+      @keyframes spin {
+        to {
+          -webkit-transform: rotate(360deg);
+                  transform: rotate(360deg);
+        }
+      }
+      .stroke-dotted {
+        opacity: 0;
+        stroke-dasharray: 4,5;
+        stroke-width: 1px;
+        -webkit-transform-origin: 50% 50%;
+            -ms-transform-origin: 50% 50%;
+                transform-origin: 50% 50%;
+        -webkit-animation: spin 4s infinite linear;
+                animation: spin 4s infinite linear;
+        -webkit-transition: opacity 1s ease,  stroke-width 1s ease;
+                transition: opacity 1s ease,  stroke-width 1s ease;
+      }
+
+      .stroke-solid {
+        stroke-dashoffset: 0;
+        stroke-dashArray: 300;
+        stroke-width: 4px;
+        -webkit-transition: stroke-dashoffset 1s ease,  opacity 1s ease;
+                transition: stroke-dashoffset 1s ease,  opacity 1s ease;
+      }
+
+      .icon {
+        -webkit-transform-origin: 50% 50%;
+            -ms-transform-origin: 50% 50%;
+                transform-origin: 50% 50%;
+        -webkit-transition: -webkit-transform 200ms ease-out;
+                transition: transform 200ms ease-out;
+      }
+
+      #play:hover .stroke-dotted {
+        stroke-width: 4px;
+        opacity: 1;
+      }
+      #play:hover .stroke-solid {
+        opacity: 0;
+        stroke-dashoffset: 300;
+      }
+      #play:hover .icon {
+        -webkit-transform: scale(1.05);
+            -ms-transform: scale(1.05);
+                transform: scale(1.05);
+      }
+
 
     </style>
 </head>
@@ -66,8 +125,17 @@
   </ol>
   <div class="video-wrapper">
     <div id="resource-video-player" class="video-player" data-id="HQzu7NYlZNQ"></div>
-    <div class="if-overlay"><img src="http://placehold.it/1140x642" alt="video thumbnail"></div>
-    <div class="play-btn"></div>
+    <div class="if-overlay"><img src="http://i.ytimg.com/vi/3fyAK60OUi8/maxresdefault.jpg" alt="video thumbnail"></div>
+    <div class="play-btn">
+      <svg version="1.1" id="play" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" height="100px" width="100px"
+       viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+      <path class="stroke-solid" fill="none" stroke="black"  d="M49.9,2.5C23.6,2.8,2.1,24.4,2.5,50.4C2.9,76.5,24.7,98,50.3,97.5c26.4-0.6,47.4-21.8,47.2-47.7
+        C97.3,23.7,75.7,2.3,49.9,2.5"/>
+      <path class="stroke-dotted" fill="none" stroke="black"  d="M49.9,2.5C23.6,2.8,2.1,24.4,2.5,50.4C2.9,76.5,24.7,98,50.3,97.5c26.4-0.6,47.4-21.8,47.2-47.7
+        C97.3,23.7,75.7,2.3,49.9,2.5"/>
+      <path class="icon" fill="black" d="M38,69c-1,0.5-1.8,0-1.8-1.1V32.1c0-1.1,0.8-1.6,1.8-1.1l34,18c1,0.5,1,1.4,0,1.9L38,69z"/>
+    </svg>
+    </div>
   </div>
   <h1 class="video-time text-center"></h1>
 </div>
