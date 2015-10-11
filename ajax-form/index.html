@@ -101,102 +101,102 @@
 <script type="text/javascript" src="../scripts/jquery.validate.js"></script>
 <script type="text/javascript" src="../scripts/bootstrap.min.js"></script>
 <script type="text/javascript">
-  jQuery(document).ready(function($){
-    
-    var ajaxFormModule = (function(){
+  jQuery( document ).ready( function( $ ) {
 
-      var view = $("#contactForm");
+    var ajaxFormModule = ( function() {
+
+      var view = $( "#contactForm" );
       var module = {};
 
-      var formLoadingState = function(loading){
-        if(loading){
-          view.addClass("loading");
-          view.find("button[type='submit']").button('loading').addClass('loading');
-        }else{
-          view.removeClass("loading");
-          view.find("button[type='submit']").button('reset').removeClass('loading');
+      var formLoadingState = function( loading ) {
+        if ( loading ) {
+          view.addClass( "loading" );
+          view.find( "button[type='submit']" ).button( "loading" ).addClass( "loading" );
+        } else {
+          view.removeClass( "loading" );
+          view.find( "button[type='submit']" ).button( "reset" ).removeClass( "loading" );
         }
       };
 
-      var enableForm = function(loading){
-        formLoadingState(loading);
-        view.find('button, input, textarea').prop('readonly', false);
-      }
-
-      var disabledForm = function(loading){
-        formLoadingState(loading);
-        view.find('button, input, textarea').prop('readonly', true);
-      }
-
-      var highlightHandler = function(input){
-        $(input).closest(".form-group").addClass("has-error");
+      var enableForm = function( loading ) {
+        formLoadingState( loading );
+        view.find( "button, input, textarea" ).prop( "readonly", false );
       };
 
-      var unhighlightHandler = function(input){
-        $(input).closest(".form-group").removeClass("has-error");
+      var disabledForm = function( loading ) {
+        formLoadingState( loading );
+        view.find( "button, input, textarea" ).prop( "readonly", true );
       };
 
-      var invalidHandler = function(){
-        formMessage(false, false, "");
+      var highlightHandler = function( input ) {
+        $( input ).closest( ".form-group" ).addClass( "has-error" );
       };
 
-      var formMessage = function(success, show, message){
-        if(typeof success !== 'undefined' && typeof show !== 'undefined'){
-          view.find(".msgSubmit").toggleClass("text-danger", !success).toggleClass("text-success", success).html(message).toggle(show);
+      var unhighlightHandler = function( input ) {
+        $( input ).closest( ".form-group" ).removeClass( "has-error" );
+      };
+
+      var invalidHandler = function() {
+        formMessage( false, false, "" );
+      };
+
+      var formMessage = function( success, show, message ) {
+        if ( typeof success !== "undefined" && typeof show !== "undefined" ) {
+          view.find( ".msgSubmit" ).toggleClass( "text-danger", !success ).toggleClass( "text-success", success ).html( message ).toggle( show );
         }
         return;
-      }
-
-      var ajaxSuccessHandler = function(response){
-        if (response.status == "success"){
-          view.get(0).reset();
-          formMessage(true, true, response.message);
-        }else{
-          formMessage(false, true, response.message);
-        }
-        enableForm(false);
       };
 
-      var ajaxErrorHandler = function(xhr, textStatus, errorThrown ) {
-        if (textStatus == 'timeout') {
+      var ajaxSuccessHandler = function( response ) {
+        if ( response.status == "success" ) {
+          view.get( 0 ).reset();
+          formMessage( true, true, response.message );
+        } else {
+          formMessage( false, true, response.message );
+        }
+        enableForm( false );
+      };
+
+      var ajaxErrorHandler = function( xhr, textStatus, errorThrown ) {
+        if ( textStatus == "timeout" ) {
           this.tryCount++;
-          if (this.tryCount <= this.retryLimit) {
-            $.ajax(this);
+          if ( this.tryCount <= this.retryLimit ) {
+            $.ajax( this );
             return;
           }
-          formMessage(false, true, view.attr("data-timeout-msg"));
-          enableForm(false);
+          formMessage( false, true, view.attr( "data-timeout-msg" ) );
+          enableForm( false );
           return;
         } else {
-          formMessage(false, true, view.attr("data-generror-msg"));
-          enableForm(false);
+          formMessage( false, true, view.attr( "data-generror-msg" ) );
+          enableForm( false );
         }
       };
 
-      var submitHandler = function(){
-        disabledForm(true);
-        $.ajax({
+      var submitHandler = function() {
+        disabledForm( true );
+        $.ajax( {
           type: "POST",
-          url: view.get(0).action,
+          url: view.get( 0 ).action,
           data: view.serialize(),
-          tryCount : 0,
-          retryLimit : 3,
-          success : ajaxSuccessHandler,
-          error : ajaxErrorHandler
-        });   
-      }
+          tryCount: 0,
+          retryLimit: 3,
+          success: ajaxSuccessHandler,
+          error: ajaxErrorHandler
+        } );
+      };
 
-      module.init = function(){
-        view.validate({
-          highlight         : highlightHandler,
-          unhighlight       : unhighlightHandler,
-          invalidHandler    : invalidHandler,
-          submitHandler     : submitHandler
-        });
-      }
+      module.init = function() {
+        view.validate( {
+          highlight: highlightHandler,
+          unhighlight: unhighlightHandler,
+          invalidHandler: invalidHandler,
+          submitHandler: submitHandler
+        } );
+      };
 
       return module.init();
-    })();
-  });
+    } )();
+  } );
 </script>
 </html>

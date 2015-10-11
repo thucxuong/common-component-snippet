@@ -53,6 +53,17 @@
 <body>
 <div class="row">
 <div class="col-sm-6 col-sm-offset-3">
+  <h1>Instruction</h1>
+  <ol>
+    <li>Setup Google Developer Account <a href="https://play.google.com/apps/publish/signup/">Here</a></li>
+    <li>Create a project in <a href="https://console.developers.google.com/">Google Developer Console</a></li>
+    <li>Choose created project in this <a href="https://console.developers.google.com/project/_/apiui/apis/library">link</a></li>
+    <li>Select Youtube API and enable it with version 3 checkbox checked</li>
+    <li>Access credentials page. Add a credential with "API Key"</li>
+    <li>Choose appropriate kind of key you need. Server API Key, Browser API Key, ...</li>
+    <li>Name it and add Accepted URL</li>
+    <li>Save your credentials</li>
+  </ol>
   <div class="video-wrapper">
     <div id="resource-video-player" class="video-player" data-id="HQzu7NYlZNQ"></div>
     <div class="if-overlay"><img src="http://placehold.it/1140x642" alt="video thumbnail"></div>
@@ -72,119 +83,159 @@
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 </script>
 <script type="text/javascript">
-  jQuery(document).ready(function($){
-    
-    window.ytVideoModule = (function(){
-      var module = {};
-      var videosObj = {};
-      var videoPlayers;
-      var videoState = {
-         "-1": "youtubeUnstarted",
-         "0": "youtubeEnded",
-         "1": "youtubePlaying",
-         "2": "youtubePaused",
-         "3": "youtubeBuffering",
-         "5": "youtubeCued"
-      };
+  //Object keys length polyfill for IE8
+  Object.keys = Object.keys || function( o, k, r ) {
+  r = [];
+  for ( k in o ) r.hasOwnProperty.call( o, k ) && r.push( k );
+  return r;
+};
 
-      module.init = function(){
-        videoPlayers = $(".video-player");
-        if(videoPlayers.length === 0){
-          return;
+jQuery( document ).ready( function( $ ) {
+
+  window.ytVideoModule = ( function() {
+    var module = {};
+    var videosObj = {};
+    var videoPlayers;
+    var videoState = {
+      "-1": "youtubeUnstarted",
+      "0": "youtubeEnded",
+      "1": "youtubePlaying",
+      "2": "youtubePaused",
+      "3": "youtubeBuffering",
+      "5": "youtubeCued"
+    };
+
+    var getYTIframe = function( ytvideoEventObj ) {
+      return $( ytvideoEventObj.target.f );
+    };
+
+    var ytStateName = function( stateNumber ) {
+      return videoState[ stateNumber ];
+    };
+
+    var convertYTDurationStrToTimeStr = function( ytDureationStr ) {
+      return ytDureationStr.replace( "PT", "" ).replace( "H", ":" ).replace( "M", ":" ).replace( "S", "" );
+    };
+
+    var getVideoIdsFromSelector = function( selector, videoidAttributeName ) {
+      var videoElements = $( selector );
+      videoIDsArr = [],
+      videoidAttributeName = videoidAttributeName ? videoidAttributeName : "data-id";
+
+      videoElements.each( function() {
+        videoIDsArr.push( $( this ).attr( videoidAttributeName ) );
+      } );
+
+      return videoIDsArr;
+    };
+
+    var buildVideosDurationObj = function() {
+      var videosDuration = {};
+      $.each( data.items, function( ind, item ) {
+        if ( item.contentDetails ) {
+          var timeStr = convertYTDurationStrToTimeStr( item.contentDetails.duration );
+          videosDuration[ "v" + item.id ] = timeStr;
         }
-        $(videoPlayers).each(function(){
-          var $_this = $(this);
-          var videoId = $_this.attr('data-id');
-          videosObj[this.id] = new YT.Player(this.id, {
-            height: $_this.attr('data-height'),
-            width: $_this.attr('data-width'),
-            videoId: videoId ? videoId : '',
-            events: {   
-              'onReady': function(ytvideoEventObj) {
-                $(ytvideoEventObj.target.f).trigger("youtubeReady");
-              },
-              'onStateChange': function(ytvideoEventObj){
-                console.log($(ytvideoEventObj.target.f).attr('data-id'));
-                if(videoState[ytvideoEventObj.data] != undefined){
-                  $(ytvideoEventObj.target.f).trigger(videoState[ytvideoEventObj.data], [$(ytvideoEventObj.target.f).attr('data-id')]);
-                }
-              }
-            }
-          });
-        });
-        $(document).trigger("videoModuleReady");
-        return module;
-      };
+      } );
 
-      module.getVideoById = function(id){
-        return videosObj[id];
-      };
+      return videosDuration;
+    };
 
-      module.videosDurationRetrive = function(selector, videoidAttributeName, cb){
-        var videos = $(selector);
-            videoIDsArr = [],
-            videoidAttributeName = videoidAttributeName ? videoidAttributeName : 'data-id';
 
-        videos.each(function() {
-            videoIDsArr.push($(this).attr(videoidAttributeName));
-        });
-        
+    // Youtube Ajax Requests Callback handlers
+    var fireYTReadyEventOnIframe = function( ytvideoEventObj ) {
+      getYTIframe( ytvideoEventObj ).trigger( "youtubeReady" );
+    };
 
-        var videoInfoRetreiveURL = "https://www.googleapis.com/youtube/v3/videos?id=" + videoIDsArr.join(",") + "&part=contentDetails&key=AIzaSyCkdDFKttW90ed6SBOYzao3pgvdweeALH4";
-        var videosDuration = {};
+    var fireYTStateChangeOnIframe = function( ytvideoEventObj ) {
 
-        $.getJSON(videoInfoRetreiveURL, function(data) {
-          $.each(data.items, function(ind, item) {
-            if (item.contentDetails) {
-              var timeStr = item.contentDetails.duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
-              videosDuration["v" + item.id] = timeStr;
-            }
-          });
-          cb(videosDuration);
-        });
+      var curStateName = ytStateName( ytvideoEventObj.data );
+      var ytIframe = getYTIframe( ytvideoEventObj );
 
+      if ( curStateName != undefined ) {
+        ytIframe.trigger(
+        curStateName, [
+        ytIframe.attr( "data-id" )
+        ]
+        );
+      }
+
+    };
+
+    // Public methods
+    module.init = function() {
+      videoPlayers = $( ".video-player" );
+      if ( videoPlayers.length === 0 ) {
         return;
-      };
+      }
+      $( videoPlayers ).each( function() {
+        var $_this = $( this );
+        var videoElData = $_this.data();
 
-      module.videoDurationRetrive = function(selector, videoidAttributeName, cb){
-        var video = $(selector),
-            videoID = videoidAttributeName ? video.attr(videoidAttributeName) : video.attr("data-id");
-
-        $.getJSON("https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&part=contentDetails&key=AIzaSyCkdDFKttW90ed6SBOYzao3pgvdweeALH4", function(data) {
-          console.log(data);
-          if (data.items[0].contentDetails) {
-            var timeStr = data.items[0].contentDetails.duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
+        videosObj[ this.id ] = new YT.Player( this.id, {
+          height: videoElData.height,
+          width: videoElData.width,
+          videoId: videoElData.id ? videoElData.id : "",
+          events: {
+            "onReady": fireYTReadyEventOnIframe,
+            "onStateChange": fireYTStateChangeOnIframe
           }
-          cb(timeStr);
-        });
+        } );
+      } );
 
-        return;
-      };
-
+      $( document ).trigger( "videoModuleReady" );
       return module;
+    };
 
-    })();
+    module.getVideoById = function( id ) {
+      return videosObj[ id ];
+    };
 
-    window.onYouTubeIframeAPIReady = function() {
-      window.ytVideoModule.init();
-    }
+    module.videoDurationRetrieve = function( selector, videoidAttributeName, cb ) {
 
-    $(document).on("videoModuleReady", function(){
-      $("body").on("click", ".play-btn", function() {
-        var overlay = $(this).parent().find(".if-overlay"),
-          playBtn = $(this),
-          video = $(this).parent().find(".video-player");
-          ytVideoModule.getVideoById(video.get(0).id).playVideo();
-          setTimeout(function() {
-            playBtn.fadeOut();
-            overlay.fadeOut();
-          }, 500);
-      });
-      ytVideoModule.videoDurationRetrive("#resource-video-player","data-id", function(time){
-        $(".video-time").html(time);
-      });
-    });
+      var videoInfoRetreiveURL = "https://www.googleapis.com/youtube/v3/videos?id=" + getVideoIdsFromSelector( selector, videoidAttributeName ).join( "," ) + "&part=contentDetails&key=AIzaSyCkdDFKttW90ed6SBOYzao3pgvdweeALH4";
+
+      $.getJSON( videoInfoRetreiveURL, function( data ) {
+        if ( data.items.length > 1 ) {
+          cb( buildVideosDurationObj() );
+        } else {
+          if ( data.items[ 0 ].contentDetails ) {
+            var timeStr = convertYTDurationStrToTimeStr( data.items[ 0 ].contentDetails.duration );
+          }
+          cb( timeStr );
+        }
+      } );
+
+      return;
+    };
+
+    return module;
+
+  } )();
+
+  window.onYouTubeIframeAPIReady = function() {
+    window.ytVideoModule.init();
+  };
+
+  $( document ).on( "videoModuleReady", function() {
     
-  });
+    $( "body" ).on( "click", ".play-btn", function() {
+      var overlay = $( this ).parent().find( ".if-overlay" ),
+      playBtn = $( this ),
+      video = $( this ).parent().find( ".video-player" );
+      ytVideoModule.getVideoById( video.get( 0 ).id ).playVideo();
+      setTimeout( function() {
+        playBtn.fadeOut();
+        overlay.fadeOut();
+      }, 500 );
+    } );
+
+    ytVideoModule.videoDurationRetrieve( "#resource-video-player", "data-id", function( time ) {
+      $( ".video-time" ).html( time );
+    } );
+
+  } );
+
+} );
 </script>
 </html>
