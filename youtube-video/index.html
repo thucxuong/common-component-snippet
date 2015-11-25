@@ -281,9 +281,20 @@ jQuery( document ).ready( function( $ ) {
 
   } )();
 
-  window.onYouTubeIframeAPIReady = function() {
-    window.ytVideoModule.init();
-  };
+  if(window.navigator.userAgent.indexOf("MSIE") >= 0){
+    window.checkYTReady = function(){
+      if(typeof YT === undefined || typeof YT.Player === undefined){
+        setTimeout(checkYTReady, 500);
+      }else{
+        window.ytVideoModule.init();
+      }
+    }
+    setTimeout(checkYTReady, 500);
+  }else{
+    window.onYouTubeIframeAPIReady = function() {
+      window.ytVideoModule.init();
+    };
+  }
 
   $( document ).on( "videoModuleReady", function() {
     
