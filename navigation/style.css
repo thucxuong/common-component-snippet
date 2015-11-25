@@ -1,0 +1,145 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Open Sans";
+}
+
+.container {
+  width: 1140px;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.container {
+  width: 1140px;
+}
+
+@media (max-width: 1200px) {
+  .container, nav ul .level-2 ul {
+    width: 1024px;
+  }
+}
+@media (max-width: 1024px) {
+  .container, nav ul .level-2 ul {
+    width: 992px;
+  }
+}
+@media (max-width: 991px) {
+  .container, nav ul .level-2 ul {
+    width: 100%;
+  }
+}
+nav {
+  background: #d35400;
+  position: relative;
+}
+nav ul {
+  list-style: none;
+  padding: 0;
+  font-size: 0;
+}
+nav ul li {
+  font-size: 14px;
+}
+nav ul li a {
+  color: white;
+  transition: background 0.3s;
+  text-decoration: none;
+}
+nav ul li a:hover {
+  background: #e67e22;
+  color: white;
+  text-decoration: none;
+}
+nav ul.level-1 {
+  font-size: 0;
+}
+nav ul.level-1 li {
+  display: inline-block;
+}
+nav ul.level-1 li > a {
+  display: inline-block;
+  padding: 15px 15px;
+}
+nav ul.level .level {
+  left: -10000px;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.no-touch nav ul.level > li:hover > .level {
+  left: 0;
+  opacity: 1;
+}
+nav .level-2 {
+  position: absolute;
+  width: 100%;
+  background: #bdc3c7;
+  left: 0;
+}
+nav .level-2 ul {
+  width: 1140px;
+  margin: 0 auto;
+}
+nav .sub-menu-toggler {
+  display: none;
+}
+@media (max-width: 1024px) {
+  nav .sub-menu-toggler {
+    height: 20px;
+    width: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-weight: bold;
+    color: white;
+    font-size: 20px;
+    line-height: 20px;
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin-top: -10px;
+  }
+  nav .sub-menu-toggler:focus, nav .sub-menu-toggler:active {
+    outline: none;
+  }
+  nav .sub-menu-toggler .close-icon {
+    display: none;
+  }
+  nav ul.level-1 li, nav ul li {
+    display: block;
+    border-top: 1px solid #f39c12;
+    overflow: hidden;
+  }
+  nav ul.level-1 a, nav ul a {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+  .touch nav ul.level-1 li:hover .level, .touch nav ul li:hover .level {
+    max-height: 1000px;
+  }
+  nav ul.level-1 li.expanded .open-icon, nav ul li.expanded .open-icon {
+    display: none;
+  }
+  nav ul.level-1 li.expanded .close-icon, nav ul li.expanded .close-icon {
+    display: block;
+  }
+  nav ul.level .level {
+    position: static;
+    transition: height 1s;
+    height: 0;
+    opacity: 1;
+  }
+}
