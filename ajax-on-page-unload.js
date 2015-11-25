@@ -1,5 +1,5 @@
 // Sending ajax on page unload excepts button click for redirection
-// test up
+
 jQuery(document).ready(function($){
   window.flag = false;
   var unloadHandler = function(){
