@@ -1,0 +1,9 @@
+.dragtarget
+{
+	width: 100px;
+	height: 100px;
+	background-color: #fcc;
+	position: relative;
+	cursor: pointer;
+	margin: 2px 0;
+}
