@@ -1,36 +1,91 @@
-// var ele = document.getElementsByClassName("dragtarget")[0];
-var boxes = document.getElementsByClassName('dragtarget'),
-i = boxes.length;
-while (i--)
-  var ele = boxes[i];
+var _startX = 0;            // mouse starting positions
+var _startY = 0;
+var _offsetX = 0;           // current element offset
+var _offsetY = 0;
+var _dragElement;           // needs to be passed from OnMouseDown to OnMouseMove
+var _oldZIndex = 0;         // we temporarily increase the z-index during drag
 
-// var ele = document.getElementById('dragtarget');
-var mover = false, x, y, posx, posy, first = true;
+InitDragDrop();
+// IE 8 9 don't support target.classList, so I rewrite the jQuery's hasClass here instead
+function hasClass(element, cls)
+{
+  return(' ' + element.className + ' ').indexOf(' '+cls+' ') > -1;
+}
 
-//enable the pointer to drag
-ele.onmousedown = function(){
-  mover = true;
-};
+function InitDragDrop()
+{
+  document.onmousedown = OnMouseDown;
+  document.onmouseup = OnMouseUp;
+}
 
-//disable the drag pointer
-ele.onmouseup = function(){
-  mover = false;
-  first = true;
-};
+function OnMouseDown(e)
+{
+  if (e == null) 
+    e = window.event; 
 
-//while move is moving which is dragging
-ele.onmousemove = function(e){
-  if(mover)
+  var target = e.target != null ? e.target : e.srcElement;
+
+  if ((e.button == 1 && window.event != null || e.button == 0) && hasClass(target,'dragtarget'))
   {
-    if(first)
-    {
-      x = e.offsetX;
-      y = e.offsetY;
-      first = false;
-    }
-    posx = e.pageX - x;
-    posy = e.pageY - y;
-    this.style.left = posx + 'px';
-    this.style.top = posy + 'px';
-  };
+    // grab the mouse position
+    _startX = e.clientX;
+    _startY = e.clientY;
+    
+    // grab the clicked element's position
+    _offsetX = ExtractNumber(target.style.left);
+    _offsetY = ExtractNumber(target.style.top);
+    
+    // bring the clicked element to the front while it is being dragged
+    _oldZIndex = target.style.zIndex;
+    target.style.zIndex = 10000;
+    
+    // we need to access the element in OnMouseMove
+    _dragElement = target;
+
+    // tell our code to start moving the element with the mouse
+    document.onmousemove = OnMouseMove;
+    
+    // cancel out any text selections
+    document.body.focus();
+
+    // prevent text selection in IE
+    document.onselectstart = function () { return false; };
+    // prevent IE from trying to drag an image
+    target.ondragstart = function() { return false; };
+    
+    // prevent text selection (except IE)
+    return false;
+  }
+}
+
+function OnMouseMove(e)
+{
+  if (e == null) 
+    var e = window.event; 
+
+  // this is the actual "drag code"
+  _dragElement.style.left = (_offsetX + e.clientX - _startX) + 'px';
+  _dragElement.style.top = (_offsetY + e.clientY - _startY) + 'px'; 
+}
+
+function OnMouseUp(e)
+{
+  if (_dragElement != null)
+  {
+    _dragElement.style.zIndex = _oldZIndex;
+
+    // we're done with these events until the next OnMouseDown
+    document.onmousemove = null;
+    document.onselectstart = null;
+    _dragElement.ondragstart = null;
+
+    // this is how we know we're not dragging      
+    _dragElement = null;
+  }
+}
+
+function ExtractNumber(value)
+{
+  var n = parseInt(value);
+  return n == null || isNaN(n) ? 0 : n;
 }
