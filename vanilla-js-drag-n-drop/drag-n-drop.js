@@ -50,7 +50,7 @@ function OnMouseDown(e)
 
     // prevent text selection in IE
     document.onselectstart = function () { return false; };
-    // prevent IE from trying to drag an image
+    // prevent from trying to drag an image <---bug here???
     target.ondragstart = function() { return false; };
     
     // prevent text selection (except IE)
