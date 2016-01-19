@@ -85,3 +85,18 @@ var getAbsoluteUrl = (function() {
     return a.href;
   };
 })();
+
+
+
+
+var isDevice = {
+  Android: navigator.userAgent.match(/Android/i)!=null, 
+  BlackBerry: navigator.userAgent.match(/BlackBerry/i)!=null, 
+  iOS: navigator.userAgent.match(/iPhone|iPad|iPod/i)!=null, 
+  Opera: navigator.userAgent.match(/Opera Mini/i)!=null, 
+  Windows: navigator.userAgent.match(/IEMobile/i)!=null
+};
+isDevice.any = (isDevice.Android || isDevice.BlackBerry || isDevice.iOS || isDevice.Opera || isDevice.Windows);
+isDevice.mobile = isDevice.any && (window.outerWidth < 768 && window.outerHeight < 768);
+isDevice.tablet = isDevice.any && (window.outerWidth > 768 || window.outerHeight > 768);
+isDevice.desktop = !isDevice.any && (window.outerWidth > 1024 || window.outerHeight > 1024);
