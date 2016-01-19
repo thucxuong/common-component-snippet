@@ -35,7 +35,20 @@ function poll(fn, callback, errback, timeout, interval) {
                 callback();
             }
             // If the condition isn't met but the timeout hasn't elapsed, go again
-            else if (Number(new Date())  0;
+            else if (Number(new Date()) < endTime) {
+                setTimeout(p, interval);
+            }
+            // Didn't match and too much time, reject!
+            else {
+                errback(new Error('timed out for ' + fn + ': ' + arguments));
+            }
+    })();
+}
+
+// Usage:  ensure element is visible
+poll(
+    function() {
+        return document.getElementById('lightbox').offsetWidth > 0;
     },
     function() {
         // Done, success callback
