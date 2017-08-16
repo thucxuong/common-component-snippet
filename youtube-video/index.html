@@ -125,7 +125,7 @@
   </ol>
   <div class="video-wrapper">
     <div id="resource-video-player" class="video-player" data-id="HQzu7NYlZNQ"></div>
-    <div class="if-overlay"><img src="http://i.ytimg.com/vi/3fyAK60OUi8/maxresdefault.jpg" alt="video thumbnail"></div>
+    <div class="if-overlay"><img src="http://i.ytimg.com/vi/HQzu7NYlZNQ/maxresdefault.jpg" alt="video thumbnail"></div>
     <div class="play-btn">
       <svg version="1.1" id="play" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" height="100px" width="100px"
        viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
@@ -261,7 +261,7 @@ jQuery( document ).ready( function( $ ) {
 
     module.videoDurationRetrieve = function( selector, videoidAttributeName, cb ) {
 
-      var videoInfoRetreiveURL = "https://www.googleapis.com/youtube/v3/videos?id=" + getVideoIdsFromSelector( selector, videoidAttributeName ).join( "," ) + "&part=contentDetails&key=AIzaSyCkdDFKttW90ed6SBOYzao3pgvdweeALH4";
+      var videoInfoRetreiveURL = "https://www.googleapis.com/youtube/v3/videos?id=" + getVideoIdsFromSelector( selector, videoidAttributeName ).join( "," ) + "&part=contentDetails&key=AIzaSyBcpHqYAlddkc5t6SZ5aFt-yjRc9PeCpkU";
 
       $.getJSON( videoInfoRetreiveURL, function( data ) {
         if ( data.items.length > 1 ) {
